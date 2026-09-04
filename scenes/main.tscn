@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://be63qcp3td00p"]
+
+[ext_resource type="Script" uid="uid://cak4e6ydw4n8k" path="res://scripts/main.gd" id="1"]
+
+[node name="DariosAGIQuest" type="Node" unique_id=579295442]
+script = ExtResource("1")

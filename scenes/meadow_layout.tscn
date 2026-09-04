@@ -1,0 +1,529 @@
+[gd_scene load_steps=29 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/art/environment/grass_tile.svg" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/soil_tile.svg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/floating_platform.svg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/flower_patch.svg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/shrub.svg" id="5"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/tree.svg" id="6"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/sign.svg" id="7"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/castle.svg" id="8"]
+[ext_resource type="Texture2D" path="res://assets/art/environment/rock.svg" id="9"]
+
+[sub_resource type="RectangleShape2D" id="GroundShape0"]
+size = Vector2(1250, 224)
+
+[sub_resource type="RectangleShape2D" id="GroundShape1"]
+size = Vector2(1050, 224)
+
+[sub_resource type="RectangleShape2D" id="GroundShape2"]
+size = Vector2(1070, 224)
+
+[sub_resource type="RectangleShape2D" id="GroundShape3"]
+size = Vector2(2370, 224)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape0"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape1"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape2"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape3"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape4"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape5"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape6"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape7"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape8"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape9"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape10"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape11"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape12"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape13"]
+size = Vector2(184, 12)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape14"]
+size = Vector2(184, 12)
+
+[node name="MeadowLayout" type="Node2D"]
+
+[node name="Ground0" type="StaticBody2D" parent="."]
+position = Vector2(0, 440)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Grass" type="Sprite2D" parent="Ground0"]
+texture_repeat = 2
+texture = ExtResource("1")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1250, 64)
+
+[node name="Soil" type="Sprite2D" parent="Ground0"]
+texture_repeat = 2
+position = Vector2(0, 64)
+texture = ExtResource("2")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1250, 160)
+
+[node name="Collision" type="CollisionShape2D" parent="Ground0"]
+position = Vector2(625, 112)
+shape = SubResource("GroundShape0")
+
+[node name="Ground1" type="StaticBody2D" parent="."]
+position = Vector2(1350, 440)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Grass" type="Sprite2D" parent="Ground1"]
+texture_repeat = 2
+texture = ExtResource("1")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1050, 64)
+
+[node name="Soil" type="Sprite2D" parent="Ground1"]
+texture_repeat = 2
+position = Vector2(0, 64)
+texture = ExtResource("2")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1050, 160)
+
+[node name="Collision" type="CollisionShape2D" parent="Ground1"]
+position = Vector2(525, 112)
+shape = SubResource("GroundShape1")
+
+[node name="Ground2" type="StaticBody2D" parent="."]
+position = Vector2(2530, 440)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Grass" type="Sprite2D" parent="Ground2"]
+texture_repeat = 2
+texture = ExtResource("1")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1070, 64)
+
+[node name="Soil" type="Sprite2D" parent="Ground2"]
+texture_repeat = 2
+position = Vector2(0, 64)
+texture = ExtResource("2")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1070, 160)
+
+[node name="Collision" type="CollisionShape2D" parent="Ground2"]
+position = Vector2(535, 112)
+shape = SubResource("GroundShape2")
+
+[node name="Ground3" type="StaticBody2D" parent="."]
+position = Vector2(3730, 440)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Grass" type="Sprite2D" parent="Ground3"]
+texture_repeat = 2
+texture = ExtResource("1")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 2370, 64)
+
+[node name="Soil" type="Sprite2D" parent="Ground3"]
+texture_repeat = 2
+position = Vector2(0, 64)
+texture = ExtResource("2")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 2370, 160)
+
+[node name="Collision" type="CollisionShape2D" parent="Ground3"]
+position = Vector2(1185, 112)
+shape = SubResource("GroundShape3")
+
+[node name="Platform0" type="StaticBody2D" parent="."]
+position = Vector2(620, 328)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform0"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform0"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape0")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform1" type="StaticBody2D" parent="."]
+position = Vector2(880, 240)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform1"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform1"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape1")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform2" type="StaticBody2D" parent="."]
+position = Vector2(1120, 192)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform2"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform2"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape2")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform3" type="StaticBody2D" parent="."]
+position = Vector2(1370, 240)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform3"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform3"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape3")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform4" type="StaticBody2D" parent="."]
+position = Vector2(1880, 328)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform4"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform4"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape4")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform5" type="StaticBody2D" parent="."]
+position = Vector2(2110, 248)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform5"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform5"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape5")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform6" type="StaticBody2D" parent="."]
+position = Vector2(2350, 184)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform6"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform6"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape6")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform7" type="StaticBody2D" parent="."]
+position = Vector2(2610, 248)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform7"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform7"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape7")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform8" type="StaticBody2D" parent="."]
+position = Vector2(2900, 328)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform8"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform8"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape8")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform9" type="StaticBody2D" parent="."]
+position = Vector2(3130, 240)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform9"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform9"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape9")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform10" type="StaticBody2D" parent="."]
+position = Vector2(3380, 192)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform10"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform10"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape10")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform11" type="StaticBody2D" parent="."]
+position = Vector2(3660, 264)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform11"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform11"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape11")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform12" type="StaticBody2D" parent="."]
+position = Vector2(4110, 328)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform12"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform12"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape12")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform13" type="StaticBody2D" parent="."]
+position = Vector2(4350, 248)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform13"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform13"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape13")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Platform14" type="StaticBody2D" parent="."]
+position = Vector2(4600, 328)
+collision_layer = 1
+collision_mask = 6
+
+[node name="Art" type="Sprite2D" parent="Platform14"]
+texture = ExtResource("3")
+centered = false
+
+[node name="Collision" type="CollisionShape2D" parent="Platform14"]
+position = Vector2(96, 6)
+shape = SubResource("PlatformShape14")
+one_way_collision = true
+one_way_collision_margin = 6.0
+
+[node name="Decorations" type="Node2D" parent="."]
+z_index = -2
+
+[node name="Tree0" type="Sprite2D" parent="Decorations"]
+position = Vector2(32, 188)
+texture = ExtResource("6")
+centered = false
+
+[node name="Shrub1" type="Sprite2D" parent="Decorations"]
+position = Vector2(330, 352)
+texture = ExtResource("5")
+centered = false
+
+[node name="FlowerPatch2" type="Sprite2D" parent="Decorations"]
+position = Vector2(210, 380)
+texture = ExtResource("4")
+centered = false
+
+[node name="Sign3" type="Sprite2D" parent="Decorations"]
+position = Vector2(410, 348)
+texture = ExtResource("7")
+centered = false
+
+[node name="FlowerPatch4" type="Sprite2D" parent="Decorations"]
+position = Vector2(770, 380)
+texture = ExtResource("4")
+centered = false
+
+[node name="Shrub5" type="Sprite2D" parent="Decorations"]
+position = Vector2(1090, 352)
+texture = ExtResource("5")
+centered = false
+
+[node name="Tree6" type="Sprite2D" parent="Decorations"]
+position = Vector2(1510, 188)
+texture = ExtResource("6")
+centered = false
+
+[node name="FlowerPatch7" type="Sprite2D" parent="Decorations"]
+position = Vector2(1420, 380)
+texture = ExtResource("4")
+centered = false
+
+[node name="Rock8" type="Sprite2D" parent="Decorations"]
+position = Vector2(1750, 380)
+texture = ExtResource("9")
+centered = false
+
+[node name="Shrub9" type="Sprite2D" parent="Decorations"]
+position = Vector2(2010, 352)
+texture = ExtResource("5")
+centered = false
+
+[node name="FlowerPatch10" type="Sprite2D" parent="Decorations"]
+position = Vector2(2240, 380)
+texture = ExtResource("4")
+centered = false
+
+[node name="Tree11" type="Sprite2D" parent="Decorations"]
+position = Vector2(2740, 188)
+texture = ExtResource("6")
+centered = false
+
+[node name="FlowerPatch12" type="Sprite2D" parent="Decorations"]
+position = Vector2(2660, 380)
+texture = ExtResource("4")
+centered = false
+
+[node name="Shrub13" type="Sprite2D" parent="Decorations"]
+position = Vector2(3220, 352)
+texture = ExtResource("5")
+centered = false
+
+[node name="Rock14" type="Sprite2D" parent="Decorations"]
+position = Vector2(3480, 380)
+texture = ExtResource("9")
+centered = false
+
+[node name="FlowerPatch15" type="Sprite2D" parent="Decorations"]
+position = Vector2(3830, 380)
+texture = ExtResource("4")
+centered = false
+
+[node name="Tree16" type="Sprite2D" parent="Decorations"]
+position = Vector2(3930, 188)
+texture = ExtResource("6")
+centered = false
+
+[node name="Shrub17" type="Sprite2D" parent="Decorations"]
+position = Vector2(4420, 352)
+texture = ExtResource("5")
+centered = false
+
+[node name="FlowerPatch18" type="Sprite2D" parent="Decorations"]
+position = Vector2(4750, 380)
+texture = ExtResource("4")
+centered = false
+
+[node name="Sign19" type="Sprite2D" parent="Decorations"]
+position = Vector2(4860, 348)
+texture = ExtResource("7")
+centered = false
+
+[node name="Tree20" type="Sprite2D" parent="Decorations"]
+position = Vector2(4980, 188)
+texture = ExtResource("6")
+centered = false
+
+[node name="Castle21" type="Sprite2D" parent="Decorations"]
+position = Vector2(5752, 120)
+texture = ExtResource("8")
+centered = false
+
+[node name="Shrub22" type="Sprite2D" parent="Decorations"]
+position = Vector2(5940, 352)
+texture = ExtResource("5")
+centered = false
+
+[node name="FlowerPatch23" type="Sprite2D" parent="Decorations"]
+position = Vector2(5630, 380)
+texture = ExtResource("4")
+centered = false
+
+[node name="FlowerPatch24" type="Sprite2D" parent="Decorations"]
+position = Vector2(912, 180)
+texture = ExtResource("4")
+centered = false
+
+[node name="FlowerPatch25" type="Sprite2D" parent="Decorations"]
+position = Vector2(2140, 188)
+texture = ExtResource("4")
+centered = false
+
+[node name="FlowerPatch26" type="Sprite2D" parent="Decorations"]
+position = Vector2(3160, 180)
+texture = ExtResource("4")
+centered = false
