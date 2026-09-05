@@ -1,5 +1,7 @@
 # Dario’s AGI Quest
 
+![Dario’s AGI Quest — Dario leaps through Token Meadow toward the castle, surrounded by tokens, power-ups, and computer bugs.](docs/images/social-preview.jpg)
+
 A small, original Godot platform adventure: big hair, little hero, and a very elusive AGI. Created by an AI agent for this request; the finished build has not received a formal human review. This is an unofficial, affectionate parody with fictional dialogue and events.
 
 ## Play on this Mac
