@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<!--
+Based on godot.html from the official Godot 4.7.2 Web export template.
+Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md).
+Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+		<title>$GODOT_PROJECT_NAME</title>
+		<meta name="theme-color" content="#214f50">
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+body {
+	color: white;
+	background-color: black;
+	overflow: hidden;
+	touch-action: none;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+#status, #status-splash, #status-progress {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+#status, #status-splash {
+	top: 0;
+	bottom: 0;
+}
+
+#status {
+	background-color: $GODOT_SPLASH_COLOR;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: hidden;
+}
+
+#status-splash {
+	max-height: 100%;
+	max-width: 100%;
+	margin: auto;
+}
+
+#status-splash.show-image--false {
+	display: none;
+}
+
+#status-splash.fullsize--true {
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
+}
+
+#status-splash.use-filter--false {
+	image-rendering: pixelated;
+}
+
+#status-progress, #status-notice {
+	display: none;
+}
+
+#status-progress {
+	bottom: 10%;
+	width: 50%;
+	margin: 0 auto;
+}
+
+#status-notice {
+	background-color: #5b3943;
+	border-radius: 0.5rem;
+	border: 1px solid #9b3943;
+	color: #e0e0e0;
+	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+	line-height: 1.3;
+	margin: 0 2rem;
+	overflow: hidden;
+	padding: 1rem;
+	text-align: center;
+	z-index: 1;
+}
+
+html, body {
+ width: 100%;
+ height: 100%;
+ overflow: hidden;
+ overscroll-behavior: none;
+ background: #214f50;
+}
+
+body {
+ position: fixed;
+ inset: 0;
+ font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#game-frame {
+ position: fixed;
+ left: 0;
+ top: 0;
+ width: 100vw;
+ height: 100vh;
+ height: 100dvh;
+ box-sizing: border-box;
+ padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+  env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+#canvas {
+ width: 100%;
+ height: 100%;
+ touch-action: none;
+ -webkit-touch-callout: none;
+ -webkit-user-select: none;
+ user-select: none;
+}
+
+#turn-device {
+ position: fixed;
+ inset: 0;
+ z-index: 5;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ box-sizing: border-box;
+ padding: max(28px, env(safe-area-inset-top, 0px)) max(28px, env(safe-area-inset-right, 0px))
+  max(28px, env(safe-area-inset-bottom, 0px)) max(28px, env(safe-area-inset-left, 0px));
+ color: #214f50;
+ background: #fff3d5;
+ text-align: center;
+ touch-action: none;
+}
+
+#turn-device[hidden] { display: none; }
+#turn-device svg { width: 124px; height: 124px; margin-bottom: 20px; flex-shrink: 0; }
+#turn-device h1 { max-width: 22rem; margin: 0; font-size: clamp(24px, 6.5vw, 36px); line-height: 1.15; }
+#turn-device p { max-width: 20rem; margin: 16px 0 0; font-size: 18px; line-height: 1.5; }
+
+#status-progress { accent-color: #bc6548; }
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<div id="game-frame">
+			<canvas id="canvas" tabindex="0" aria-label="Dario's AGI Quest game">
+				Your browser does not support the canvas tag.
+			</canvas>
+		</div>
+
+		<div id="turn-device" role="status" aria-live="polite" hidden>
+			<svg viewBox="0 0 128 128" fill="none" aria-hidden="true">
+				<rect x="29" y="33" width="70" height="42" rx="9" transform="rotate(-25 64 54)" fill="#eab85d" stroke="#214f50" stroke-width="5"/>
+				<path d="M88 38L102 69" stroke="#214f50" stroke-width="4" stroke-linecap="round"/>
+				<path d="M27 88C43 108 75 111 99 87M86 87H100V101" stroke="#bc6548" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>
+			<h1>Turn your device sideways</h1>
+			<p>Dario needs room to run! Play in landscape with the touch controls.</p>
+		</div>
+
+		<noscript>
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<div id="status">
+			<img id="status-splash" class="$GODOT_SPLASH_CLASSES" src="$GODOT_SPLASH" alt="">
+			<progress id="status-progress"></progress>
+			<div id="status-notice"></div>
+		</div>
+
+		<script>
+(function () {
+ const canvas = document.getElementById('canvas');
+ const frame = document.getElementById('game-frame');
+ const turnDevice = document.getElementById('turn-device');
+ const forceTouch = new URLSearchParams(window.location.search).get('touch') === '1';
+ const coarsePointer = window.matchMedia('(any-pointer: coarse)');
+ let pagePresent = true;
+ let resizePending = false;
+
+ // This object stays stable so JavaScriptBridge can retain its reference.
+ const state = window.darioMobile = {
+  isTouch: forceTouch || navigator.maxTouchPoints > 0 || coarsePointer.matches,
+  portrait: false,
+  pageVisible: !document.hidden,
+  pauseRevision: 0
+ };
+
+ function updateState() {
+  const viewport = window.visualViewport;
+  const width = viewport ? viewport.width : window.innerWidth;
+  const height = viewport ? viewport.height : window.innerHeight;
+  const touch = forceTouch || navigator.maxTouchPoints > 0 || coarsePointer.matches;
+  const portrait = touch && height > width;
+  // Browser chrome can take focus while the game remains visible and playable.
+  // Only a shown rotation prompt or an actually hidden page interrupts play.
+  const pageVisible = pagePresent && !document.hidden;
+  if ((portrait && !state.portrait) || (!pageVisible && state.pageVisible)) {
+   state.pauseRevision += 1;
+  }
+  state.isTouch = touch;
+  state.portrait = portrait;
+  state.pageVisible = pageVisible;
+  turnDevice.hidden = !portrait;
+
+  // VisualViewport follows the mobile address bar; dvh remains the CSS fallback.
+  frame.style.width = width + 'px';
+  frame.style.height = height + 'px';
+  if (!resizePending) {
+   resizePending = true;
+   requestAnimationFrame(resizeCanvas);
+  }
+ }
+
+ function resizeCanvas() {
+  resizePending = false;
+  const bounds = canvas.getBoundingClientRect();
+  // Avoid allocating an unnecessarily large framebuffer on high-density phones.
+  const ratio = state.isTouch ? Math.min(window.devicePixelRatio || 1, 2) : (window.devicePixelRatio || 1);
+  const width = Math.max(1, Math.round(bounds.width * ratio));
+  const height = Math.max(1, Math.round(bounds.height * ratio));
+  if (canvas.width !== width) canvas.width = width;
+  if (canvas.height !== height) canvas.height = height;
+ }
+
+ window.addEventListener('resize', updateState);
+ window.addEventListener('orientationchange', updateState);
+ document.addEventListener('visibilitychange', updateState);
+ window.addEventListener('pagehide', () => { pagePresent = false; updateState(); });
+ window.addEventListener('pageshow', () => { pagePresent = true; updateState(); });
+ if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateState);
+ }
+ if (coarsePointer.addEventListener) coarsePointer.addEventListener('change', updateState);
+ if (window.ResizeObserver) new ResizeObserver(resizeCanvas).observe(frame);
+ canvas.addEventListener('contextmenu', event => event.preventDefault());
+ canvas.addEventListener('touchmove', event => event.preventDefault(), { passive: false });
+ canvas.addEventListener('gesturestart', event => event.preventDefault(), { passive: false });
+ canvas.addEventListener('gesturechange', event => event.preventDefault(), { passive: false });
+ updateState();
+ resizeCanvas();
+}());
+		</script>
+
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
+	const statusNotice = document.getElementById('status-notice');
+
+	let initializing = true;
+	let statusMode = '';
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) {
+			return;
+		}
+		if (mode === 'hidden') {
+			statusOverlay.remove();
+			initializing = false;
+			return;
+		}
+		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) {
+			statusNotice.removeChild(statusNotice.lastChild);
+		}
+		const lines = text.split('\n');
+		lines.forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		if (err instanceof Error) {
+			setStatusNotice(err.message);
+		} else if (typeof err === 'string') {
+			setStatusNotice(err);
+		} else {
+			setStatusNotice('An unknown error occurred.');
+		}
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let serviceWorkerRegistrationPromise;
+			try {
+				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+			} catch (err) {
+				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+			}
+			// There's a chance that installing the service worker would fix the issue
+			Promise.race([
+				serviceWorkerRegistrationPromise.then((registration) => {
+					if (registration != null) {
+						return Promise.reject(new Error('Service worker already exists.'));
+					}
+					return registration;
+				}).then(() => engine.installServiceWorker()),
+				// For some reason, `getRegistration()` can stall
+				new Promise((resolve) => {
+					setTimeout(() => resolve(), 2000);
+				}),
+			]).then(() => {
+				// Reload if there was no error.
+				window.location.reload();
+			}).catch((err) => {
+				console.error('Error while registering service worker:', err);
+			});
+		} else {
+			// Display the message as usual
+			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+			displayFailureNotice(missingMsg + missing.join('\n'));
+		}
+	} else {
+		setStatusMode('progress');
+		engine.startGame({
+			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) {
+					statusProgress.value = current;
+					statusProgress.max = total;
+				} else {
+					statusProgress.removeAttribute('value');
+					statusProgress.removeAttribute('max');
+				}
+			},
+		}).then(() => {
+			setStatusMode('hidden');
+		}, displayFailureNotice);
+	}
+}());
+		</script>
+	</body>
+</html>

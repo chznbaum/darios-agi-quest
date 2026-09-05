@@ -5,6 +5,7 @@ const PlayerScript = preload('res://scripts/player.gd')
 const EnemyScript = preload('res://scripts/enemy.gd')
 const BossScript = preload('res://scripts/boss.gd')
 const PickupScript = preload('res://scripts/pickup.gd')
+const TouchControlsScript = preload('res://scripts/touch_controls.gd')
 const ARROW_ICON = preload('res://assets/art/ui/arrow_right.svg')
 const PAUSE_ICON = preload('res://assets/art/ui/pause.svg')
 const SOUND_ON_ICON = preload('res://assets/art/ui/sound_on.svg')
@@ -57,10 +58,19 @@ var menu_time := 0.0
 var theme_regular: Font
 var theme_bold: Font
 var run_id := 0
+var touch_mode := false
+var touch_controls: Node2D
+var _mobile_bridge
+var _mobile_blocked := false
+var _mobile_page_visible := true
+var _mobile_pause_revision := 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_configure_input()
+	if OS.has_feature('web'):
+		_mobile_bridge = JavaScriptBridge.get_interface('darioMobile')
+	touch_mode = _detect_touch_mode()
 	theme_regular = load('res://assets/fonts/Rubik-Regular.ttf')
 	theme_bold = load('res://assets/fonts/Rubik-Bold.ttf')
 	_load_save()
@@ -72,6 +82,35 @@ func _ready() -> void:
 	ui.layer = 10
 	add_child(ui)
 	_show_title()
+	_sync_mobile_environment()
+
+func _detect_touch_mode() -> bool:
+	if '--touch-controls' in OS.get_cmdline_user_args(): return true
+	if _mobile_bridge != null: return bool(_mobile_bridge.isTouch)
+	return DisplayServer.is_touchscreen_available()
+
+func _sync_mobile_environment() -> void:
+	if touch_mode and _mobile_bridge != null:
+		_apply_mobile_environment(bool(_mobile_bridge.portrait), bool(_mobile_bridge.pageVisible), int(_mobile_bridge.pauseRevision))
+
+func _apply_mobile_environment(portrait: bool, page_visible: bool, pause_revision: int) -> void:
+	# The visible rotation prompt is the only persistent block on resuming.
+	_mobile_blocked = portrait
+	var became_hidden := _mobile_page_visible and not page_visible
+	_mobile_page_visible = page_visible
+	var interrupted := pause_revision != _mobile_pause_revision
+	_mobile_pause_revision = pause_revision
+	if touch_mode and state == 'level' and (_mobile_blocked or interrupted or became_hidden) and not get_tree().paused:
+		_pause()
+	_sync_touch_controls()
+
+func _sync_touch_controls() -> void:
+	if is_instance_valid(touch_controls):
+		touch_controls.set_enabled(touch_mode and state == 'level' and not get_tree().paused and not _mobile_blocked and _mobile_page_visible and not death_pending and not transitioning)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and not OS.has_feature('web') and touch_mode and state == 'level' and is_instance_valid(screen):
+		if not get_tree().paused: _pause()
 
 func _configure_input() -> void:
 	var bindings := {
@@ -105,6 +144,8 @@ func _save() -> void:
 	cfg.save(SAVE_PATH)
 
 func _clear_screen() -> void:
+	if is_instance_valid(touch_controls): touch_controls.release_all()
+	touch_controls = null
 	run_id += 1
 	transitioning = false
 	get_tree().paused = false
@@ -166,6 +207,9 @@ func _panel(parent: Node, rect: Rect2, color: Color, border := Color.TRANSPARENT
 	return panel
 
 func _button(parent: Node, text: String, rect: Rect2, callback: Callable, primary := false, button_icon: Texture2D = null) -> Button:
+	if touch_mode:
+		var touch_size := Vector2(maxf(64, rect.size.x), maxf(64, rect.size.y))
+		rect = Rect2(rect.get_center() - touch_size / 2, touch_size)
 	var button := Button.new()
 	button.text = text
 	button.icon = button_icon
@@ -233,14 +277,14 @@ func _show_title() -> void:
 	title.add_theme_constant_override('shadow_offset_x', 3)
 	_label(screen, 'Big hair. Small hero. Unreasonably ambitious quest.', Vector2(58,240), 16, INK)
 	_label(screen, 'Bounce through Token Meadow, outwit the bugs,\nand find out what’s really in that castle.', Vector2(58,275), 16, INK)
-	_button(screen, 'LET’S GO', Rect2(58,342,222,52), _show_map, true, ARROW_ICON).grab_focus()
-	_button(screen, 'How to play', Rect2(58,408,145,42), _show_help)
-	_button(screen, 'Sound: ' + ('off' if muted else 'on'), Rect2(215,408,130,42), _toggle_mute_button)
+	_button(screen, 'LET’S GO', Rect2(58,326,300,64) if touch_mode else Rect2(58,342,222,52), _show_map, true, ARROW_ICON).grab_focus()
+	_button(screen, 'How to play', Rect2(58,410,174,64) if touch_mode else Rect2(58,408,145,42), _show_help)
+	_button(screen, 'Sound: ' + ('off' if muted else 'on'), Rect2(250,410,150,64) if touch_mode else Rect2(215,408,130,42), _toggle_mute_button)
 	title_hero = _icon(screen, 0, Rect2(579,272,147,212))
 	_icon(screen, 8, Rect2(747,278,32,36))
 	_icon(screen, 9, Rect2(788,360,40,48))
 	_panel(screen, Rect2(40,491,880,29), Color('#fff1d4dc'), Color.TRANSPARENT, 8)
-	_label(screen, 'WASD + SPACE TO PLAY', Vector2(57,497), 11, INK, true)
+	_label(screen, 'TOUCH CONTROLS  /  PLAY SIDEWAYS' if touch_mode else 'WASD + SPACE TO PLAY', Vector2(57,497), 11, INK, true)
 	_label(screen, 'An unofficial, affectionate AI-industry parody', Vector2(405,497), 11, INK)
 	_label(screen, 'CHAPTER 01', Vector2(807,497), 11, INK, true)
 	Audio.play_music('title')
@@ -260,7 +304,7 @@ func _update_sound_button() -> void:
 	if not is_instance_valid(hud_sound_button): return
 	hud_sound_button.icon = SOUND_OFF_ICON if muted else SOUND_ON_ICON
 	hud_sound_button.accessibility_name = 'Unmute sound' if muted else 'Mute sound'
-	hud_sound_button.tooltip_text = hud_sound_button.accessibility_name + ' (M)'
+	hud_sound_button.tooltip_text = hud_sound_button.accessibility_name + ('' if touch_mode else ' (M)')
 
 func _show_help() -> void:
 	if is_instance_valid(pause_panel): return
@@ -268,9 +312,10 @@ func _show_help() -> void:
 	pause_panel = Control.new()
 	screen.add_child(pause_panel)
 	_shade(pause_panel, Color(0.10,0.23,0.23,0.6)).mouse_filter = Control.MOUSE_FILTER_STOP
-	_panel(pause_panel, Rect2(169,56,622,428), CREAM, INK, 18)
+	_panel(pause_panel, Rect2(169,36,622,468) if touch_mode else Rect2(169,56,622,428), CREAM, INK, 18)
 	_label(pause_panel, 'SMALL HERO. BIG MOVES.', Vector2(211,88), 28, INK, true)
-	_label(pause_panel, 'A / D   Move     •     W / Space   Jump\nHold jump to go higher. Shift to run. S to fast-fall.\nEsc   Pause     •     M   Sound     •     F11   Fullscreen', Vector2(212,140), 17, INK)
+	var controls_help := 'Hold LEFT / RIGHT to move. Hold JUMP to go higher.\nRunning starts on. Tap RUN to switch to walking.\nHold DROP to fall faster. Tap the pause or sound icon.' if touch_mode else 'A / D   Move     •     W / Space   Jump\nHold jump to go higher. Shift to run. S to fast-fall.\nEsc   Pause     •     M   Sound     •     F11   Fullscreen'
+	_label(pause_panel, controls_help, Vector2(212,140), 17, INK)
 	_icon(pause_panel, 9, Rect2(212,243,44,54))
 	_label(pause_panel, 'Safety Shield', Vector2(274,242), 18, INK, true)
 	_label(pause_panel, 'Blocks one hit. Lasts 12 seconds.', Vector2(274,268), 15, INK)
@@ -278,7 +323,7 @@ func _show_help() -> void:
 	_label(pause_panel, 'Overclock Coffee', Vector2(274,311), 18, INK, true)
 	_label(pause_panel, 'A 10-second burst of speed and bigger jumps.', Vector2(274,338), 15, INK)
 	_label(pause_panel, 'Stomp bugs and Sam from above. Flags save your place.\nThree insight crystals are hidden along the high route.', Vector2(212,380), 15, INK)
-	_button(pause_panel, 'Got it!', Rect2(620,427,127,38), _close_overlay, true).grab_focus()
+	_button(pause_panel, 'Got it!', Rect2(606,430,141,64) if touch_mode else Rect2(620,427,127,38), _close_overlay, true).grab_focus()
 
 func _close_overlay() -> void:
 	if is_instance_valid(pause_panel): pause_panel.queue_free()
@@ -348,6 +393,10 @@ func _start_level() -> void:
 	camera.make_current()
 	_populate_level()
 	_create_hud()
+	if touch_mode:
+		touch_controls = TouchControlsScript.new()
+		screen.add_child(touch_controls)
+		_sync_touch_controls()
 	_update_health(player.health)
 	_toast('TOKEN MEADOW   •   Let’s find that AGI.', 3.0)
 	Audio.play_music('meadow')
@@ -377,10 +426,10 @@ func _token_arc(x: float, y: float, count: int, spacing := 45.0) -> void:
 		_pickup('token', Vector2(x+i*spacing,y-sin(float(i)/maxf(count-1,1)*PI)*30))
 
 func _populate_level() -> void:
-	_world_text('A / D   MOVE\nW / SPACE   JUMP', Vector2(68,306), 15, 200)
+	_world_text('HOLD ARROWS TO MOVE\nHOLD JUMP TO GO HIGHER' if touch_mode else 'A / D   MOVE\nW / SPACE   JUMP', Vector2(68,306), 15, 230 if touch_mode else 200)
 	_world_text('HOLD JUMP\nTO GO HIGHER', Vector2(382,290), 13, 170)
 	_world_text('STOMP FROM ABOVE!', Vector2(856,362), 13, 250)
-	_world_text('SHIFT TO RUN', Vector2(1507,380), 13, 210)
+	_world_text('RUN IS ON\nTAP RUN TO WALK' if touch_mode else 'SHIFT TO RUN', Vector2(1507,380), 13, 210)
 	_world_text('THE HIGH ROAD\nHAS ITS REWARDS', Vector2(2825,255), 13, 240)
 	_world_text('ONE LAST LEAP', Vector2(4600,375), 13, 250)
 	for data in [[280,391,5],[643,287,4],[909,199,4],[1192,315,5],[1510,393,5],[1905,287,4],[2140,207,4],[2420,315,5],[2700,390,4],[2930,287,4],[3160,199,4],[3480,305,5],[3830,388,4],[4150,287,3],[4380,207,3],[4710,387,5],[4990,388,4]]:
@@ -447,13 +496,13 @@ func _create_hud() -> void:
 	for i in range(3): hud_hearts.append(_icon(screen,11,Rect2(32+i*34,31,27,26)))
 	_icon(screen,8,Rect2(156,30,28,29))
 	hud_tokens = _label(screen,'000',Vector2(193,31),23,INK,true)
-	_panel(screen, Rect2(670,16,272,58), CREAM, INK, 12)
-	_icon(screen,15,Rect2(689,28,28,32))
-	hud_insights = _label(screen,'0 / 3',Vector2(729,32),21,INK,true)
-	var pause_button := _button(screen,'',Rect2(838,27,42,35),_pause,false,PAUSE_ICON)
+	_panel(screen, Rect2(622,16,320,82) if touch_mode else Rect2(670,16,272,58), CREAM, INK, 12)
+	_icon(screen,15,Rect2(642,39,28,32) if touch_mode else Rect2(689,28,28,32))
+	hud_insights = _label(screen,'0 / 3',Vector2(684,43) if touch_mode else Vector2(729,32),21,INK,true)
+	var pause_button := _button(screen,'',Rect2(795,25,64,64) if touch_mode else Rect2(838,27,42,35),_pause,false,PAUSE_ICON)
 	pause_button.accessibility_name = 'Pause'
-	pause_button.tooltip_text = 'Pause (Esc)'
-	hud_sound_button = _button(screen,'',Rect2(890,27,39,35),_toggle_mute,false,SOUND_ON_ICON)
+	pause_button.tooltip_text = 'Pause' if touch_mode else 'Pause (Esc)'
+	hud_sound_button = _button(screen,'',Rect2(868,25,64,64) if touch_mode else Rect2(890,27,39,35),_toggle_mute,false,SOUND_ON_ICON)
 	_update_sound_button()
 	power_label = _label(screen,'',Vector2(23,82),14,INK,true)
 	power_label.add_theme_color_override('font_outline_color',CREAM)
@@ -474,7 +523,7 @@ func _create_hud() -> void:
 	progress_bar.add_theme_stylebox_override('fill',fill)
 	screen.add_child(progress_bar)
 	progress_bar.set_deferred('size', Vector2(248,7))
-	toast_label = _label(screen,'',Vector2(150,479),18,CREAM,true,660)
+	toast_label = _label(screen,'',Vector2(60,143) if touch_mode else Vector2(150,479),18,CREAM,true,840 if touch_mode else 660)
 	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	toast_label.add_theme_color_override('font_outline_color',INK)
 	toast_label.add_theme_constant_override('outline_size',8)
@@ -533,12 +582,14 @@ func _on_died() -> void:
 	if death_pending: return
 	var dying_run := run_id
 	death_pending = true
+	_sync_touch_controls()
 	deaths += 1
 	_toast('A small setback. A fresh start.', 1.0)
 	await get_tree().create_timer(0.8, false).timeout
 	if state != 'level' or run_id != dying_run or not is_instance_valid(player): return
 	player.respawn(checkpoint)
 	death_pending = false
+	_sync_touch_controls()
 	if boss_started and not boss_beaten:
 		_spawn_boss()
 		boss_started = false
@@ -546,7 +597,7 @@ func _on_died() -> void:
 		boss_bar.visible = false
 		boss_caption.visible = false
 		Audio.play_music('meadow')
-	_toast('Back at the flag. You’ve got this.' if checkpoint_reached else 'Try again! Hold W / Space for a higher jump.')
+	_toast('Back at the flag. You’ve got this.' if checkpoint_reached else ('Try again! Hold JUMP for a higher jump.' if touch_mode else 'Try again! Hold W / Space for a higher jump.'))
 
 func _boss_defeated() -> void:
 	boss_beaten = true
@@ -559,10 +610,13 @@ func _boss_defeated() -> void:
 func _pause() -> void:
 	if state != 'level': return
 	if get_tree().paused:
+		if touch_mode and _mobile_blocked: return
 		get_tree().paused = false
 		_close_overlay()
+		_sync_touch_controls()
 		return
 	get_tree().paused = true
+	_sync_touch_controls()
 	_set_menu_enabled(false)
 	pause_panel = Control.new()
 	screen.add_child(pause_panel)
@@ -570,15 +624,16 @@ func _pause() -> void:
 	_panel(pause_panel,Rect2(268,109,424,326),CREAM,INK,18)
 	_label(pause_panel,'TAKE A BREATHER',Vector2(304,139),27,INK,true)
 	_label(pause_panel,'Even little heroes need a pause.',Vector2(306,181),16,INK)
-	_button(pause_panel,'KEEP GOING',Rect2(306,231,347,48),_pause,true).grab_focus()
-	_button(pause_panel,'Restart level',Rect2(306,293,164,42),_start_level)
-	_button(pause_panel,'World map',Rect2(488,293,165,42),_show_map)
-	_label(pause_panel,'A / D move  •  W / Space jump  •  Shift run\nM sound  •  F11 fullscreen  •  Esc resume',Vector2(306,365),13,INK)
+	_button(pause_panel,'KEEP GOING',Rect2(306,216,347,64) if touch_mode else Rect2(306,231,347,48),_pause,true).grab_focus()
+	_button(pause_panel,'Restart level',Rect2(306,296,164,64) if touch_mode else Rect2(306,293,164,42),_start_level)
+	_button(pause_panel,'World map',Rect2(488,296,165,64) if touch_mode else Rect2(488,293,165,42),_show_map)
+	_label(pause_panel,'Two thumbs. One big adventure.\nHold JUMP for higher leaps and stomps.' if touch_mode else 'A / D move  •  W / Space jump  •  Shift run\nM sound  •  F11 fullscreen  •  Esc resume',Vector2(306,375) if touch_mode else Vector2(306,365),13,INK)
 
 func _finish_level() -> void:
 	if transitioning: return
 	var finishing_run := run_id
 	transitioning = true
+	_sync_touch_controls()
 	player.input_enabled = false
 	player.velocity = Vector2.ZERO
 	level_cleared = true
@@ -650,6 +705,7 @@ func _physics_process(_delta: float) -> void:
 				_burst(object.position+Vector2(0,-25),10 if power=='coffee' else 9,6)
 
 func _process(delta: float) -> void:
+	_sync_mobile_environment()
 	menu_time += delta
 	if is_instance_valid(title_hero): title_hero.position.y = 272 + sin(menu_time*2.0)*3
 	if is_instance_valid(map_hero): map_hero.position.y = (192 if selected_map==0 else 146) + sin(menu_time*3.0)*3

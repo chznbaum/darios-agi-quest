@@ -36,6 +36,9 @@ var _squash_tween: Tween
 
 func _ready() -> void:
 	add_to_group("player")
+	for action in ["move_left", "move_right", "jump", "sprint", "crouch"]:
+		if not InputMap.has_action("touch_" + action):
+			InputMap.add_action("touch_" + action)
 	collision_layer = 2
 	collision_mask = 1
 	floor_snap_length = 6.0
@@ -80,11 +83,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		_coyote_time = maxf(0.0, _coyote_time - delta)
 	_jump_buffer = maxf(0.0, _jump_buffer - delta)
-	if input_enabled and Input.is_action_just_pressed("jump"):
+	if input_enabled and (Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("touch_jump")):
 		_jump_buffer = BUFFER_DURATION
 
-	var direction := Input.get_axis("move_left", "move_right") if input_enabled else 0.0
-	var top_speed := RUN_SPEED if input_enabled and Input.is_action_pressed("sprint") else WALK_SPEED
+	var direction := _action_strength("move_right") - _action_strength("move_left") if input_enabled else 0.0
+	var top_speed := RUN_SPEED if input_enabled and _action_held("sprint") else WALK_SPEED
 	if boost_time > 0.0:
 		top_speed *= 1.25
 	var acceleration := 1850.0 if was_grounded else 1250.0
@@ -93,7 +96,7 @@ func _physics_process(delta: float) -> void:
 	if _knockback_time <= 0.0:
 		velocity.x = move_toward(velocity.x, direction * top_speed, acceleration * delta)
 	if not was_grounded:
-		var fall_scale := 1.5 if input_enabled and Input.is_action_pressed("crouch") and velocity.y > 0.0 else 1.0
+		var fall_scale := 1.5 if input_enabled and _action_held("crouch") and velocity.y > 0.0 else 1.0
 		velocity.y = minf(velocity.y + GRAVITY * fall_scale * delta, 900.0)
 	if _jump_buffer > 0.0 and _coyote_time > 0.0:
 		velocity.y = JUMP_SPEED * (1.10 if boost_time > 0.0 else 1.0)
@@ -101,7 +104,8 @@ func _physics_process(delta: float) -> void:
 		_jump_buffer = 0.0
 		_squash(Vector2(0.84, 1.12))
 		_play_sound("jump")
-	if input_enabled and Input.is_action_just_released("jump") and velocity.y < -190.0:
+	var jump_released := Input.is_action_just_released("jump") or Input.is_action_just_released("touch_jump")
+	if input_enabled and jump_released and not _action_held("jump") and velocity.y < -190.0:
 		velocity.y = -190.0
 	var downward_speed := velocity.y
 	move_and_slide()
@@ -112,6 +116,14 @@ func _physics_process(delta: float) -> void:
 	_update_visual()
 	if global_position.y > 780.0:
 		_die()
+
+
+func _action_strength(action: String) -> float:
+	return maxf(Input.get_action_strength(action), Input.get_action_strength("touch_" + action))
+
+
+func _action_held(action: String) -> bool:
+	return _action_strength(action) > 0.0
 
 
 func take_hit(from_x: float) -> void:
@@ -142,7 +154,7 @@ func take_hit(from_x: float) -> void:
 func bounce() -> void:
 	if is_dead:
 		return
-	velocity.y = JUMP_SPEED * 0.82 if input_enabled and Input.is_action_pressed("jump") else -430.0
+	velocity.y = JUMP_SPEED * 0.82 if input_enabled and _action_held("jump") else -430.0
 	_coyote_time = 0.0
 	_jump_buffer = 0.0
 	_squash(Vector2(0.83, 1.14))
